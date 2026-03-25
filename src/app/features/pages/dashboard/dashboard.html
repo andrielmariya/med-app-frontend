@@ -1,0 +1,264 @@
+<div class="flex min-h-screen bg-health-bg text-14">
+    <!-- Sidebar -->
+    <app-sidebar [isSuperuser]="isSuperuser"></app-sidebar>
+
+    <!-- Main Content -->
+    <main class="flex-1 flex flex-col min-h-screen relative overflow-x-hidden">
+        <!-- Header -->
+        <app-header [username]="username" [isSuperuser]="isSuperuser" searchPlaceholder="Search logs..."></app-header>
+
+        <!-- Content Area -->
+        <div class="p-8 space-y-8">
+            <div class="flex flex-col md:flex-row md:items-center justify-between gap-4">
+                <div>
+                    <h2 class="text-15 font-bold text-health-text">Medical Overview</h2>
+                    <p class="text-health-muted text-14">Visualize your health data and AI diagnosis trends.</p>
+                </div>
+                <button (click)="showForm = true" class="btn-primary text-14">
+                    <lucide-icon [img]="PlusCircleIcon" size="20"></lucide-icon>
+                    New Health Log
+                </button>
+            </div>
+
+            <!-- Modal -->
+            <div *ngIf="showForm"
+                class="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-black/40 backdrop-blur-sm">
+                <div class="bg-white rounded-3xl p-8 w-full max-w-xl shadow-2xl relative">
+                    <button (click)="showForm = false"
+                        class="absolute top-6 right-6 text-health-muted hover:text-health-text border-none bg-transparent cursor-pointer">
+                        <lucide-icon [img]="ChevronDownIcon" class="rotate-180" size="24"></lucide-icon>
+                    </button>
+                    <app-health-form (success)="onFormSuccess()"></app-health-form>
+                </div>
+            </div>
+
+            <!-- Time Range Toggle -->
+            <div class="flex items-center justify-between bg-white p-4 rounded-2xl border border-health-border shadow-sm">
+                <div class="flex items-center gap-3">
+                    <div class="p-2 bg-health-lightTeal rounded-lg">
+                        <lucide-icon [img]="HistoryIcon" class="text-health-teal" size="18"></lucide-icon>
+                    </div>
+                    <span class="font-bold text-health-text text-14">Analysis Range</span>
+                </div>
+                <div class="flex bg-health-bg p-1 rounded-xl border border-health-border">
+                    <button (click)="setTimeRange('7d')" 
+                        [class.bg-white]="currentTimeRange === '7d'"
+                        [class.shadow-sm]="currentTimeRange === '7d'"
+                        [class.text-health-teal]="currentTimeRange === '7d'"
+                        class="px-4 py-1.5 rounded-lg text-13 font-bold transition-all border-none bg-transparent cursor-pointer">
+                        Last 7 Days
+                    </button>
+                    <button (click)="setTimeRange('1y')" 
+                        [class.bg-white]="currentTimeRange === '1y'"
+                        [class.shadow-sm]="currentTimeRange === '1y'"
+                        [class.text-health-teal]="currentTimeRange === '1y'"
+                        class="px-4 py-1.5 rounded-lg text-13 font-bold transition-all border-none bg-transparent cursor-pointer">
+                        Historical (1 Year)
+                    </button>
+                </div>
+            </div>
+
+            <!-- Metrics & AI Trends -->
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+              
+
+                <!-- Red Flags (Larger) -->
+                <div class="widget-card h-[400px] col-span-1 md:col-span-2 lg:col-span-1">
+                    <div *ngIf="redFlagOptions; else noRedFlags" echarts [options]="redFlagOptions" class="w-full h-full"></div>
+                    <ng-template #noRedFlags>
+                        <div class="w-full h-full flex flex-col items-center justify-center text-center p-6">
+                            <lucide-icon [img]="ActivityIcon" class="text-health-border mb-3" size="32"></lucide-icon>
+                            <h4 class="text-14 font-bold text-health-text">No Red Flags</h4>
+                            <p class="text-13 text-health-muted mt-1">Our AI hasn't detected any critical red flags in the selected period.</p>
+                        </div>
+                    </ng-template>
+                </div>
+
+                <!-- Health Risks (Larger) -->
+                <div class="widget-card h-[400px] col-span-1 md:col-span-2 lg:col-span-1">
+                    <div *ngIf="riskOptions; else noRisks" echarts [options]="riskOptions" class="w-full h-full"></div>
+                    <ng-template #noRisks>
+                        <div class="w-full h-full flex flex-col items-center justify-center text-center p-6">
+                            <lucide-icon [img]="ActivityIcon" class="text-health-border mb-3" size="32"></lucide-icon>
+                            <h4 class="text-14 font-bold text-health-text">Risk Analysis</h4>
+                            <p class="text-13 text-health-muted mt-1">No significant risk factors tracked in this time range.</p>
+                        </div>
+                    </ng-template>
+                </div>
+
+               
+
+                <div *ngIf="!redFlagOptions && !riskOptions && (!metricsData || !metricsData['severity'] || metricsData['severity'].length === 0)"
+                    class="col-span-full border-2 border-dashed border-health-border rounded-2xl py-20 text-center">
+                    <lucide-icon [img]="StatsIcon" class="mx-auto text-health-border mb-4" size="48"></lucide-icon>
+                    <p class="text-health-muted text-14">Log details to see symptom trends and AI risk analysis.</p>
+                </div>
+            </div>
+            <div class="my-2"></div>
+ <!-- Severity Trend -->
+
+                     <app-severity-chart [metrics]="metricsData"></app-severity-chart>
+      
+               
+            <!-- AI Summary Stats Widget -->
+            <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+                <div class="widget-card lg:col-span-2 bg-[#2AB0B8]/5 border-[#2AB0B8]/10">
+                    <div class="flex items-center gap-3 mb-4">
+                        <div class="p-2 bg-health-teal rounded-lg">
+                            <lucide-icon [img]="FileTextIcon" class="text-white" size="16"></lucide-icon>
+                        </div>
+                        <h3 class="text-15 font-bold text-health-text">AI Health Intelligence Summary</h3>
+                    </div>
+                    <div class="space-y-4">
+                        <p class="text-14 text-health-text leading-relaxed">"{{ healthSummary.latestInsight ||
+                            'Awaiting more logs for a personalized health summary...' }}"</p>
+                        <div class="flex flex-wrap gap-4 pt-4 border-t border-health-border/50">
+                            <div class="flex items-center gap-2">
+                                <span class="text-13 font-bold text-health-muted uppercase">Avg Severity:</span>
+                                <span class="text-14 font-black text-health-teal">{{ healthSummary.avgSeverity
+                                    }}/10</span>
+                            </div>
+                            <div class="flex items-center gap-2 border-l border-health-border pl-4">
+                                <span class="text-13 font-bold text-health-muted uppercase">Dominant:</span>
+                                <div class="flex gap-1">
+                                    <span *ngFor="let sym of healthSummary.topSymptoms; trackBy: trackById"
+                                        class="text-13 bg-white border border-health-border px-2 py-0.5 rounded-md font-bold text-health-text">{{
+                                        sym }}</span>
+                                    <span *ngIf="healthSummary.topSymptoms.length === 0"
+                                        class="text-13 text-health-muted">None yet</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="widget-card flex flex-col justify-center items-center text-center">
+                    <div
+                        class="w-16 h-16 bg-health-lightTeal rounded-full flex items-center justify-center mb-4 border-4 border-white shadow-sm">
+                        <span class="text-15 font-black text-health-teal">{{ healthSummary.totalLogs }}</span>
+                    </div>
+                    <p class="text-13 font-bold text-health-muted uppercase tracking-widest">Total Health Logs</p>
+                    <p class="text-13 text-health-text mt-1">Consistent tracking is key to diagnosis.</p>
+                </div>
+            </div>
+
+            <!-- Statistics Table Section -->
+           
+
+
+
+
+
+
+
+            <!-- Medical History -->
+            <div class="space-y-8">
+                <div>
+                    <h2 class="text-15 font-bold text-health-text">Medical History</h2>
+                    <p class="text-health-muted text-14">A complete record of all your health logs and AI diagnoses.</p>
+                </div>
+
+            <!-- History Table -->
+            <div class="widget-card overflow-hidden">
+                <div class="overflow-x-auto">
+                    <table class="w-full text-left border-collapse">
+                        <thead>
+                            <tr class="border-b border-health-border">
+                                <th class="pb-4 font-bold text-13 text-health-muted uppercase tracking-wider">Date &
+                                    Time</th>
+                                <th class="pb-4 font-bold text-13 text-health-muted uppercase tracking-wider">Symptoms
+                                </th>
+                                <th class="pb-4 font-bold text-13 text-health-muted uppercase tracking-wider">Summary
+                                </th>
+                                <th
+                                    class="pb-4 text-right font-bold text-13 text-health-muted uppercase tracking-wider">
+                                    Details</th>
+                            </tr>
+                        </thead>
+                        <tbody class="divide-y divide-health-border">
+                            <ng-container *ngFor="let record of records; trackBy: trackById">
+                                <tr class="group hover:bg-health-bg/50 transition-colors cursor-pointer" 
+                                    (click)="toggleExpand(record.id)">
+                                    <td class="py-5 pl-4">
+                                        <div class="flex items-center gap-3">
+                                            <lucide-icon [img]="expandedRecord === record.id ? ChevronDownIcon : ChevronRightIcon" 
+                                                class="text-health-muted transition-transform" 
+                                                size="18"></lucide-icon>
+                                            <div>
+                                                <div class="text-14 font-semibold text-health-text">{{ record.created_at | date:'mediumDate' }}</div>
+                                                <div class="text-13 text-health-muted">{{ record.created_at | date:'shortTime' }}</div>
+                                            </div>
+                                        </div>
+                                    </td>
+                                    <td class="py-5">
+                                        <span class="inline-block px-3 py-1 bg-health-lightTeal text-health-teal rounded-full text-13 font-bold uppercase tracking-wider">
+                                            {{ record.symptoms }}
+                                        </span>
+                                    </td>
+                                    <td class="py-5 max-w-xs">
+                                        <p class="text-13 text-health-text font-medium truncate">{{ record.ai_summary }}</p>
+                                    </td>
+                                    <td class="py-5 pr-4 text-right">
+                                        <span class="text-13 font-bold text-health-muted uppercase tracking-widest group-hover:text-health-teal transition-colors">
+                                            {{ record.ai_severity > 7 ? 'Critical' : (record.ai_severity > 4 ? 'Moderate' : 'Mild') }}
+                                        </span>
+                                    </td>
+                                </tr>
+                                <!-- Expanded Detail Row -->
+                                <tr *ngIf="expandedRecord === record.id" class="animate-in fade-in slide-in-from-top-2 duration-300">
+                                    <td colspan="4" class="p-0 border-b border-health-border">
+                                        <div class="bg-gray-50/80 p-8">
+                                            <div class="grid grid-cols-1 md:grid-cols-2 gap-10">
+                                                <div class="space-y-4">
+                                                    <div class="flex items-center gap-2 mb-2">
+                                                        <div class="w-1.5 h-4 bg-health-teal rounded-full"></div>
+                                                        <h4 class="text-13 font-bold text-health-muted uppercase tracking-widest">Symptom Context</h4>
+                                                    </div>
+                                                    <div class="bg-white p-5 rounded-2xl shadow-sm border border-health-border leading-relaxed text-14 text-health-text">
+                                                        {{ record.details || 'No additional context provided for this record.' }}
+                                                    </div>
+                                                </div>
+                                                <div class="space-y-4">
+                                                    <div class="flex items-center gap-2 mb-2">
+                                                        <div class="w-1.5 h-4 bg-orange-400 rounded-full"></div>
+                                                        <h4 class="text-13 font-bold text-health-muted uppercase tracking-widest">AI Clinical Insight</h4>
+                                                    </div>
+                                                    <div class="bg-white p-5 rounded-2xl shadow-sm border border-health-border space-y-5">
+                                                        <p class="text-14 font-semibold text-health-text leading-tight">{{ record.ai_summary }}</p>
+                                                        <div class="pt-5 border-t border-health-border">
+                                                            <div class="text-13 font-bold text-health-teal uppercase tracking-widest mb-2 flex items-center gap-2">
+                                                                <lucide-icon [img]="ActivityIcon" size="12"></lucide-icon>
+                                                                Recommended Care Path
+                                                            </div>
+                                                            <p class="text-13 text-health-muted leading-relaxed">
+                                                                {{ record.ai_outcomes || 'Please consult a medical professional for advice.' }}
+                                                            </p>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </td>
+                                </tr>
+                            </ng-container>
+                        </tbody>
+                    </table>
+                </div>
+
+                <div *ngIf="!loading && records.length === 0" class="py-20 text-center">
+                    <lucide-icon [img]="FileTextIcon" class="mx-auto text-health-border mb-4 opacity-50"
+                        size="48"></lucide-icon>
+                    <p class="text-14 text-health-muted">No history found.</p>
+                </div>
+
+                <div *ngIf="loading" class="py-20 flex flex-col items-center">
+                    <div class="w-8 h-8 border-4 border-health-teal border-t-transparent rounded-full animate-spin">
+                    </div>
+                    <p class="mt-4 text-13 text-health-muted">Aggregating AI health insights...</p>
+                </div>
+            </div>
+        </div>
+
+    </div>
+</main>
+</div>

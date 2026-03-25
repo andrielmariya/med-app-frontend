@@ -1,0 +1,66 @@
+<div class="space-y-6 text-14">
+    <div class="flex items-center gap-3 mb-2">
+        <div class="w-10 h-10 bg-health-lightTeal rounded-xl flex items-center justify-center">
+            <lucide-icon [img]="ActivityIcon" class="text-health-teal" size="20"></lucide-icon>
+        </div>
+        <h3 class="text-15 font-bold text-health-text">Record Your Symptoms</h3>
+    </div>
+
+    <div *ngIf="error" class="bg-red-50 text-red-500 border border-red-100 p-4 rounded-xl text-14 leading-relaxed">
+        {{error}}
+    </div>
+
+    <form (ngSubmit)="onSubmit()" class="space-y-6">
+        <div class="space-y-2">
+            <label class="block text-13 font-bold text-health-muted uppercase tracking-widest ml-1">Current
+                Condition</label>
+            <input type="text" [(ngModel)]="symptoms" name="symptoms" class="input-field text-14"
+                placeholder="e.g. Sharp headache, mild fever" required [disabled]="loading" />
+        </div>
+        <div class="space-y-2">
+            <label class="block text-13 font-bold text-health-muted uppercase tracking-widest ml-1">Contextual
+                Details</label>
+            <textarea [(ngModel)]="details" name="details" class="input-field min-h-[140px] resize-none text-14"
+                placeholder="When did it start? Any medication taken?" [disabled]="loading"></textarea>
+        </div>
+        <div class="space-y-4">
+            <label class="block text-13 font-bold text-health-muted uppercase tracking-widest ml-1">AI Analyst</label>
+            <div class="flex p-1 bg-health-bg rounded-xl border border-health-border">
+                <button type="button" 
+                    (click)="modelType = 'local'"
+                    [class.bg-white]="modelType === 'local'"
+                    [class.shadow-sm]="modelType === 'local'"
+                    [class.text-health-teal]="modelType === 'local'"
+                    class="flex-1 py-2 text-13 font-bold rounded-lg transition-all text-health-muted">
+                    Local AI (Privacy)
+                </button>
+                <button type="button" 
+                    (click)="modelType = 'gemini'"
+                    [class.bg-white]="modelType === 'gemini'"
+                    [class.shadow-sm]="modelType === 'gemini'"
+                    [class.text-health-teal]="modelType === 'gemini'"
+                    class="flex-1 py-2 text-13 font-bold rounded-lg transition-all text-health-muted">
+                    Gemini AI (Cloud)
+                </button>
+            </div>
+        </div>
+
+        <div class="flex gap-4">
+            <button type="button" (click)="success.emit()"
+                class="flex-1 bg-health-bg hover:bg-health-border text-health-muted font-bold rounded-xl px-4 py-3 transition-all text-14"
+                [disabled]="loading">
+                Cancel
+            </button>
+            <button type="submit" class="flex-[2] btn-primary text-14" [disabled]="loading || !symptoms">
+                <ng-container *ngIf="loading; else btnText">
+                    <span class="flex items-center gap-2">
+                        <lucide-icon [img]="Loader2Icon" class="animate-spin" size="20"></lucide-icon> AI Analysis...
+                    </span>
+                </ng-container>
+                <ng-template #btnText>
+                    Submit Records
+                </ng-template>
+            </button>
+        </div>
+    </form>
+</div>

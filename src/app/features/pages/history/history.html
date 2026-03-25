@@ -1,0 +1,119 @@
+<div class="flex min-h-screen bg-health-bg text-14">
+    <!-- Sidebar -->
+    <app-sidebar [isSuperuser]="isSuperuser"></app-sidebar>
+
+    <!-- Main Content -->
+    <main class="flex-1 flex flex-col min-h-screen relative overflow-x-hidden">
+        <!-- Header -->
+        <app-header [username]="username" [isSuperuser]="isSuperuser" searchPlaceholder="Search history..."></app-header>
+
+        <!-- Content Area -->
+        <div class="p-8 space-y-8">
+            <div>
+                <h2 class="text-15 font-bold text-health-text">Medical History</h2>
+                <p class="text-health-muted text-14">A complete record of all your health logs and AI diagnoses.</p>
+            </div>
+
+            <!-- History Table -->
+            <div class="widget-card overflow-hidden">
+                <div class="overflow-x-auto">
+                    <table class="w-full text-left border-collapse">
+                        <thead>
+                            <tr class="border-b border-health-border">
+                                <th class="pb-4 font-bold text-13 text-health-muted uppercase tracking-wider">Date &
+                                    Time</th>
+                                <th class="pb-4 font-bold text-13 text-health-muted uppercase tracking-wider">Symptoms
+                                </th>
+                                <th class="pb-4 font-bold text-13 text-health-muted uppercase tracking-wider">Summary
+                                </th>
+                                <th
+                                    class="pb-4 text-right font-bold text-13 text-health-muted uppercase tracking-wider">
+                                    Details</th>
+                            </tr>
+                        </thead>
+                        <tbody class="divide-y divide-health-border">
+                            <ng-container *ngFor="let record of records; trackBy: trackById">
+                                <tr class="group hover:bg-health-bg/50 transition-colors cursor-pointer" 
+                                    (click)="toggleExpand(record.id)">
+                                    <td class="py-5 pl-4">
+                                        <div class="flex items-center gap-3">
+                                            <lucide-icon [img]="expandedRecord === record.id ? ChevronDownIcon : ChevronRightIcon" 
+                                                class="text-health-muted transition-transform" 
+                                                size="18"></lucide-icon>
+                                            <div>
+                                                <div class="text-14 font-semibold text-health-text">{{ record.created_at | date:'mediumDate' }}</div>
+                                                <div class="text-13 text-health-muted">{{ record.created_at | date:'shortTime' }}</div>
+                                            </div>
+                                        </div>
+                                    </td>
+                                    <td class="py-5">
+                                        <span class="inline-block px-3 py-1 bg-health-lightTeal text-health-teal rounded-full text-13 font-bold uppercase tracking-wider">
+                                            {{ record.symptoms }}
+                                        </span>
+                                    </td>
+                                    <td class="py-5 max-w-xs">
+                                        <p class="text-13 text-health-text font-medium truncate">{{ record.ai_summary }}</p>
+                                    </td>
+                                    <td class="py-5 pr-4 text-right">
+                                        <span class="text-13 font-bold text-health-muted uppercase tracking-widest group-hover:text-health-teal transition-colors">
+                                            {{ record.ai_severity > 7 ? 'Critical' : (record.ai_severity > 4 ? 'Moderate' : 'Mild') }}
+                                        </span>
+                                    </td>
+                                </tr>
+                                <!-- Expanded Detail Row -->
+                                <tr *ngIf="expandedRecord === record.id" class="animate-in fade-in slide-in-from-top-2 duration-300">
+                                    <td colspan="4" class="p-0 border-b border-health-border">
+                                        <div class="bg-gray-50/80 p-8">
+                                            <div class="grid grid-cols-1 md:grid-cols-2 gap-10">
+                                                <div class="space-y-4">
+                                                    <div class="flex items-center gap-2 mb-2">
+                                                        <div class="w-1.5 h-4 bg-health-teal rounded-full"></div>
+                                                        <h4 class="text-13 font-bold text-health-muted uppercase tracking-widest">Symptom Context</h4>
+                                                    </div>
+                                                    <div class="bg-white p-5 rounded-2xl shadow-sm border border-health-border leading-relaxed text-14 text-health-text">
+                                                        {{ record.details || 'No additional context provided for this record.' }}
+                                                    </div>
+                                                </div>
+                                                <div class="space-y-4">
+                                                    <div class="flex items-center gap-2 mb-2">
+                                                        <div class="w-1.5 h-4 bg-orange-400 rounded-full"></div>
+                                                        <h4 class="text-13 font-bold text-health-muted uppercase tracking-widest">AI Clinical Insight</h4>
+                                                    </div>
+                                                    <div class="bg-white p-5 rounded-2xl shadow-sm border border-health-border space-y-5">
+                                                        <p class="text-14 font-semibold text-health-text leading-tight">{{ record.ai_summary }}</p>
+                                                        <div class="pt-5 border-t border-health-border">
+                                                            <div class="text-13 font-bold text-health-teal uppercase tracking-widest mb-2 flex items-center gap-2">
+                                                                <lucide-icon [img]="ActivityIcon" size="12"></lucide-icon>
+                                                                Recommended Care Path
+                                                            </div>
+                                                            <p class="text-13 text-health-muted leading-relaxed">
+                                                                {{ record.ai_outcomes || 'Please consult a medical professional for advice.' }}
+                                                            </p>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </td>
+                                </tr>
+                            </ng-container>
+                        </tbody>
+                    </table>
+                </div>
+
+                <div *ngIf="!loading && records.length === 0" class="py-20 text-center">
+                    <lucide-icon [img]="FileTextIcon" class="mx-auto text-health-border mb-4 opacity-50"
+                        size="48"></lucide-icon>
+                    <p class="text-14 text-health-muted">No history found.</p>
+                </div>
+
+                <div *ngIf="loading" class="py-20 flex flex-col items-center">
+                    <div class="w-8 h-8 border-4 border-health-teal border-t-transparent rounded-full animate-spin">
+                    </div>
+                    <p class="mt-4 text-13 text-health-muted">Aggregating AI health insights...</p>
+                </div>
+            </div>
+        </div>
+
+    </main>
+</div>

@@ -1,0 +1,60 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+    :root {
+        --fs-13: 13px;
+        --fs-14: 14px;
+        --fs-15: 15px;
+    }
+
+    body {
+        background-color: #F8FBFC;
+        color: #2C3E50;
+        margin: 0;
+        font-family: 'Inter', sans-serif;
+        font-size: var(--fs-14);
+        font-style: normal !important;
+    }
+
+    /* Force global non-italic */
+    * {
+        font-style: normal !important;
+    }
+
+    h1, h2, h3, h4, h5, h6 {
+        font-size: var(--fs-15);
+        font-weight: 700;
+    }
+}
+
+@layer utilities {
+    .text-13 { font-size: 13px !important; }
+    .text-14 { font-size: 14px !important; }
+    .text-15 { font-size: 15px !important; }
+}
+
+@layer components {
+    .widget-card {
+        @apply bg-white border border-health-border rounded-2xl p-6 shadow-sm;
+    }
+
+    .input-field {
+        @apply w-full bg-white border border-health-border rounded-xl px-4 py-3 outline-none;
+    }
+
+    .btn-primary {
+        @apply bg-health-teal text-white font-semibold rounded-xl px-6 py-3 flex justify-center items-center gap-2 cursor-pointer border-none;
+        text-decoration: none;
+        user-select: none;
+    }
+
+    .nav-item {
+        @apply flex items-center gap-3 px-4 py-3 rounded-xl cursor-pointer text-health-muted font-medium;
+    }
+
+    .nav-item.active {
+        @apply bg-health-lightTeal text-health-teal;
+    }
+}

@@ -1,0 +1,59 @@
+<div class="min-h-screen bg-health-bg flex flex-col justify-center items-center p-6 text-14">
+  <div class="w-full max-w-sm">
+    <!-- Brand -->
+    <div class="flex flex-col items-center mb-10">
+      <div class="bg-health-teal p-3 rounded-2xl shadow-lg shadow-health-teal/20 mb-4 animate-in zoom-in duration-500">
+        <lucide-icon [img]="ActivityIcon" class="text-white" size="32"></lucide-icon>
+      </div>
+      <h1 class="text-15 font-black text-health-text tracking-tighter uppercase">Healthpro<span
+          class="text-health-teal">+</span></h1>
+      <p class="text-health-muted text-13 font-medium tracking-wide">Secure Patient Portal</p>
+    </div>
+
+    <!-- Login Form -->
+    <div
+      class="bg-white p-8 rounded-3xl shadow-xl shadow-health-teal/5 border border-health-border/50 animate-in fade-in slide-in-from-bottom-4 duration-500">
+      <div class="mb-6">
+        <h2 class="text-15 font-bold text-health-text">{{ showReset ? 'Reset Credentials' : 'Welcome' }}</h2>
+        <p class="text-health-muted text-13">{{ showReset ? 'Modify account access' : 'Identify yourself to continue' }}
+        </p>
+      </div>
+
+      <div *ngIf="error"
+        class="mb-4 p-3 bg-red-50 text-red-500 text-13 font-bold rounded-xl border border-red-100">
+        {{ error }}
+      </div>
+      <div *ngIf="message"
+        class="mb-4 p-3 bg-green-50 text-green-600 text-13 font-bold rounded-xl border border-green-100 flex items-center gap-2">
+        <lucide-icon [img]="CheckCircleIcon" size="14"></lucide-icon> {{ message }}
+      </div>
+
+      <!-- Normal Login -->
+      <form *ngIf="!showReset" [formGroup]="loginForm" (ngSubmit)="onSubmit()" class="space-y-4">
+        <div>
+          <label
+            class="block text-13 font-bold text-health-muted uppercase px-1 mb-2 tracking-widest">Username</label>
+          <input type="text" formControlName="username" class="input-field text-14" placeholder="Enter your ID" />
+        </div>
+        <div>
+          <label
+            class="block text-13 font-bold text-health-muted uppercase px-1 mb-2 tracking-widest">Password</label>
+          <input type="password" formControlName="password" class="input-field text-14" placeholder="••••••••" />
+        </div>
+
+        <button type="submit" [disabled]="loginForm.invalid" class="btn-primary w-full py-4 mt-2 text-14">
+          Enter Dashboard
+        </button>
+      </form>
+
+
+      <div class="mt-8 text-center text-13 font-bold px-1">
+        <a routerLink="/register" class="text-health-teal hover:underline tracking-tighter uppercase">Join Healthpro+</a>
+      </div>
+    </div>
+
+    <p class="mt-12 text-center text-13 text-health-muted uppercase tracking-[0.2em] font-bold opacity-50">
+      Private Medical Network • Encrypted Session
+    </p>
+  </div>
+</div>
